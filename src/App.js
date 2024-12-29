@@ -5,7 +5,7 @@ import Cart from "./components/Cart/Cart";
 import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
 import Notification from "./components/UI/Notification";
-import { sendCartData } from "./store/cart-slice";
+import { sendCartData, fetchCartData } from "./store/cart-actions";
 
 // 앱 로딩시 빈 장바구니 백엔드에 전송 방지: 함수 외부에 변수 선언
 let initial = true;
@@ -18,13 +18,20 @@ function App() {
   const notification = useSelector((state) => state.ui.notification);
 
   useEffect(() => {
+    dispatch(fetchCartData());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (initial) {
       initial = false;
       return;
     }
 
-    // 함수 dispatch 
-    dispatch(sendCartData(cart));
+    if (cart.changed) {
+      dispatch(
+        sendCartData({ items: cart.items, totalQuantity: cart.totalQuantity }) // changed는 전송 x
+      );
+    }
   }, [cart, dispatch]); // 의존성에 cart : cart 변경될 때마다 fetch
 
   return (
